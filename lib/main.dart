@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wassup_front/me.dart';
+import 'home.dart';
 import 'login.dart';
 
 void main() {
@@ -67,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = const Placeholder();
+        page = const HomeScreen();
         break;
       case 1:
         page = const Placeholder();
