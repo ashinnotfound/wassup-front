@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wassup_front/me.dart';
-import 'home.dart';
-import 'login.dart';
+import 'package:wassup_front/widget/me.dart';
+import 'widget/home.dart';
+import 'widget/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,6 +37,10 @@ class MyAppState extends ChangeNotifier {
     this.userName = userName;
     isLoggedIn = true;
     notifyListeners();
+  }
+
+  void updateToken(String token) {
+    this.token = token;
   }
 
   void logout() {

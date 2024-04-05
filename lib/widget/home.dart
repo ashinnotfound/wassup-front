@@ -1,87 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-
-import 'config.dart';
-import 'main.dart';
-
-class Post {
-  final String content;
-  final int userId;
-  final String userName;
-  final String userAvatar;
-  final bool hasMedia;
-  final DateTime timestamp;
-  final List<String> mediaUrls;
-
-  Post({
-    required this.content,
-    required this.userId,
-    required this.userName,
-    required this.userAvatar,
-    required this.hasMedia,
-    required this.timestamp,
-    required this.mediaUrls,
-  });
-}
+import '../entity/Post.dart';
+import '../request/post_request.dart';
+import '../util/time_util.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
-}
-
-Future<List<Post>> getPosts(String token) async {
-  try {
-    var value = await http.get(
-      Uri.parse('${Config.postUrl}post'),
-      headers: <String, String>{
-        'Content-Type': 'application/json;charset=UTF-8',
-        'Authorization': 'Bearer $token'
-      },
-    );
-    if (value.statusCode == 200) {
-      var responseData = jsonDecode(value.body);
-      if (responseData['code'] == 200) {
-        return (responseData['data'] as List)
-            .map((post) => Post(
-                  content: post['content'],
-                  userId: post['userId'],
-                  userName: post['userName'],
-                  userAvatar: post['userAvatar'],
-                  hasMedia: post['hasMedia'],
-                  timestamp: DateTime.parse(post['postTime']),
-                  mediaUrls: post['hasMedia']
-                      ? List<String>.from(post['mediaUrls'])
-                      : [],
-                ))
-            .toList();
-      } else {
-        throw Exception(responseData['message']);
-      }
-    } else {
-      throw Exception('网络错误');
-    }
-  } catch (e) {
-    rethrow;
-  }
-}
-
-String getTimeDifference(DateTime timestamp) {
-  final now = DateTime.now();
-  final difference = now.difference(timestamp);
-
-  if (difference.inDays > 0) {
-    return '${difference.inDays} 天前';
-  } else if (difference.inHours > 0) {
-    return '${difference.inHours} 小时前';
-  } else if (difference.inMinutes > 0) {
-    return '${difference.inMinutes} 分钟前';
-  } else {
-    return '刚刚';
-  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -92,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("let's see some new shit!"),
       ),
       body: FutureBuilder<List<Post>>(
-        future: getPosts(context.read<MyAppState>().token),
+        future: getPosts(context),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -135,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const Spacer(),
                             Text(
-                              getTimeDifference(posts[index].timestamp),
+                              getTimeDifference(posts[index].postTime),
                               style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14.0,

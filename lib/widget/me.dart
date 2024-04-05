@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'main.dart';
+import '../main.dart';
 
 class MeWidget extends StatelessWidget {
   const MeWidget({super.key});
