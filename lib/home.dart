@@ -7,17 +7,19 @@ import 'config.dart';
 import 'main.dart';
 
 class Post {
-  final String title;
   final String content;
   final int userId;
+  final String userName;
+  final String userAvatar;
   final bool hasMedia;
   final DateTime timestamp;
   final List<String> mediaUrls;
 
   Post({
-    required this.title,
     required this.content,
     required this.userId,
+    required this.userName,
+    required this.userAvatar,
     required this.hasMedia,
     required this.timestamp,
     required this.mediaUrls,
@@ -45,9 +47,10 @@ Future<List<Post>> getPosts(String token) async {
       if (responseData['code'] == 200) {
         return (responseData['data'] as List)
             .map((post) => Post(
-                  title: post['title'],
                   content: post['content'],
                   userId: post['userId'],
+                  userName: post['userName'],
+                  userAvatar: post['userAvatar'],
                   hasMedia: post['hasMedia'],
                   timestamp: DateTime.parse(post['postTime']),
                   mediaUrls: post['hasMedia']
@@ -107,41 +110,82 @@ class _HomeScreenState extends State<HomeScreen> {
             final posts = snapshot.data!;
 
             return ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      leading: posts[index].hasMedia
-                          ? Image.network(
-                              posts[index].mediaUrls[0],
-                              width: 48, // Adjust the width as needed
-                              height: 48,
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                      title: Text(posts[index].title),
-                      trailing: Text(posts[index].content),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(getTimeDifference(posts[index].timestamp)),
-                          const SizedBox(height: 8),
-                          const Row(
-                            children: [
-                              Icon(Icons.favorite_border),
-                              SizedBox(width: 4),
-                              Text('0'),
-                              SizedBox(width: 16),
-                              Icon(Icons.comment),
-                              SizedBox(width: 4),
-                              Text('0'),
-                            ],
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  elevation: 4.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(posts[index].userAvatar),
+                            ),
+                            const SizedBox(width: 8.0),
+                            Text(
+                              posts[index].userName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              getTimeDifference(posts[index].timestamp),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8.0),
+                        Text(
+                          posts[index].content,
+                          style: const TextStyle(
+                            fontSize: 16.0,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 8.0),
+                        // Display all media URLs in a row
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          children: posts[index].mediaUrls.map((url) {
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: SizedBox(
+                                width: 100.0, // Adjust the width as needed
+                                height: 100.0, // Adjust the height as needed
+                                child: Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 8.0),
+                        const Row(
+                          children: [
+                            Icon(Icons.favorite_border, color: Colors.grey),
+                            SizedBox(width: 4.0),
+                            Text('0'),
+                            SizedBox(width: 16.0),
+                            Icon(Icons.comment, color: Colors.grey),
+                            SizedBox(width: 4.0),
+                            Text('0'),
+                          ],
+                        ),
+                      ],
                     ),
-                  );
-                });
+                  ),
+                );
+              },
+            );
           }
           return const SizedBox.shrink();
         },
