@@ -79,6 +79,11 @@ class LoginDialogState extends State<LoginDialog> {
                         {
                           if (jsonDecode(value.body)['code'] == 200)
                             {
+                              if (isLogin)
+                                {
+                                  context.read<MyAppState>().login(
+                                      jsonDecode(value.body)['data'], userName),
+                                },
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content:
@@ -86,11 +91,6 @@ class LoginDialogState extends State<LoginDialog> {
                                   backgroundColor: Colors.green,
                                 ),
                               ),
-                              if (isLogin)
-                                {
-                                  context.read<MyAppState>().login(
-                                      jsonDecode(value.body)['data'], userName),
-                                },
                             }
                           else
                             {
