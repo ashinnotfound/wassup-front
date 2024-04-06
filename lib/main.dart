@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wassup_front/widget/me.dart';
+import 'package:wassup_front/widget/post.dart';
 import 'widget/home.dart';
 import 'widget/login.dart';
 
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const HomeScreen();
         break;
       case 1:
-        page = const Placeholder();
+        page = const PostScreen();
         break;
       case 2:
         page = const MeWidget();

@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:wassup_front/request/request.dart';
 import '../entity/Post.dart';
 import '../request/post_request.dart';
-import '../util/time_util.dart';
+import '../util/wassup_util.dart';
+import 'component/video_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -77,20 +81,38 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 8.0),
-                        // Display all media URLs in a row
                         Wrap(
                           alignment: WrapAlignment.end,
                           children: posts[index].mediaUrls.map((url) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: SizedBox(
-                                width: 100.0, // Adjust the width as needed
-                                height: 100.0, // Adjust the height as needed
-                                child: Image.network(
-                                  url,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                            return FutureBuilder<Widget>(
+                              future: showMedia(url),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text(
+                                        'Error: ${snapshot.error.toString()}'),
+                                  );
+                                }
+
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                if (snapshot.hasData) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: SizedBox(
+                                      width: 100.0,
+                                      height: 100.0,
+                                      child: snapshot.data,
+                                    ),
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              },
                             );
                           }).toList(),
                         ),
@@ -116,6 +138,20 @@ class _HomeScreenState extends State<HomeScreen> {
           return const SizedBox.shrink();
         },
       ),
+    );
+  }
+}
+
+Future<Widget> showMedia(String url) async {
+  Uint8List media = await getFileBytes(url);
+  if (media[0] == 0xFF && media[1] == 0xD8) {
+    return Image.memory(
+      media,
+      fit: BoxFit.cover,
+    );
+  } else {
+    return VideoApp(
+      videoBytes: media,
     );
   }
 }

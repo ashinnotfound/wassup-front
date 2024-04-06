@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
+
 String getTimeDifference(DateTime timestamp) {
   final now = DateTime.now();
   final difference = now.difference(timestamp);
@@ -11,4 +14,8 @@ String getTimeDifference(DateTime timestamp) {
   } else {
     return '刚刚';
   }
+}
+
+String getMd5(Uint8List bytes) {
+  return md5.convert(bytes).toString();
 }
