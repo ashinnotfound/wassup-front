@@ -24,6 +24,7 @@ class _VideoAppState extends State<VideoApp> {
             ? Url.createObjectUrl(Blob([widget.videoBytes]))
             : widget.url!))
       ..initialize().then((_) {
+        _controller.setLooping(true);
         setState(() {});
       });
   }
