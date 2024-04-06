@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -15,33 +16,36 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Post>? _posts;
+  final Set<int> _shownPostIndices = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("let's see some new shit!"),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              _refreshPosts;
+            },
+            child: const Text('刷新'),
+          ),
+        ],
       ),
-      body: FutureBuilder<List<Post>>(
-        future: getPosts(context),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error.toString()}'),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+      body: _posts == null
+          ? const Center(
               child: CircularProgressIndicator(),
-            );
-          }
-
-          if (snapshot.hasData) {
-            final posts = snapshot.data!;
-
-            return ListView.builder(
-              itemCount: posts.length,
+            )
+          : ListView.builder(
+              itemCount: _posts!.length <= 5 ? _posts!.length : 5,
               itemBuilder: (context, index) {
+                int randomIndex;
+                do {
+                  randomIndex = Random().nextInt(_posts!.length);
+                } while (_shownPostIndices.contains(randomIndex));
+                _shownPostIndices.add(randomIndex);
+                final post = _posts![randomIndex];
                 return Card(
                   elevation: 4.0,
                   child: Padding(
@@ -52,12 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(posts[index].userAvatar),
+                              backgroundImage: NetworkImage(post.userAvatar),
                             ),
                             const SizedBox(width: 8.0),
                             Text(
-                              posts[index].userName,
+                              post.userName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16.0,
@@ -65,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const Spacer(),
                             Text(
-                              getTimeDifference(posts[index].postTime),
+                              getTimeDifference(post.postTime),
                               style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 14.0,
@@ -75,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 8.0),
                         Text(
-                          posts[index].content,
+                          post.content,
                           style: const TextStyle(
                             fontSize: 16.0,
                           ),
@@ -83,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 8.0),
                         Wrap(
                           alignment: WrapAlignment.end,
-                          children: posts[index].mediaUrls.map((url) {
+                          children: post.mediaUrls.map((url) {
                             return FutureBuilder<Widget>(
                               future: showMedia(url),
                               builder: (context, snapshot) {
@@ -133,12 +136,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
+            ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshPosts();
+  }
+
+  Future<void> _refreshPosts() async {
+    setState(() {
+      _posts = null;
+      _shownPostIndices.clear();
+    });
+    final posts = await getPosts(context);
+    setState(() {
+      _posts = posts;
+    });
   }
 }
 
