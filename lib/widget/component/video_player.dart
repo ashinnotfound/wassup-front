@@ -4,14 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-void main() {
-  runApp(VideoApp(
-    videoBytes: [] as Uint8List,
-    url:
-        "https://wassup.ashinnotfound.top/minio/wassup/563697a4007c8208b9b3410c5fe7725e",
-  ));
-}
-
 class VideoApp extends StatefulWidget {
   final Uint8List? videoBytes;
   final String? url;
